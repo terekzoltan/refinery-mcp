@@ -28,11 +28,11 @@ A `check_instance` minden hívásban a felsorolt objektumok és kapcsolatok telj
 
 ## Példa Copilotból
 
-Csatold a [hibás példányt](examples/check-instance/contradictory.json) a chathez, majd küldd el ezt a kérést.
+Nyiss új Agent-chatet, és küldd el ezt a kérést.
 
-> Kérd le a metamodellt a `get_metamodel` eszközzel. A csatolt JSON teljes tartalmát küldd be a `check_instance` eszköznek. Mutasd meg a diagnosztikát. Javítsd a laptop kategóriáját úgy, hogy az electronics maradjon. Tartsd meg a könyv books besorolását, az összes objektumot és a többi kapcsolatot. Hívd meg ismét a `check_instance` eszközt a javított teljes példánnyal. Írd ki, melyik kapcsolat változott és mi lett az eredmény.
+> Kérd le a metamodellt a `get_metamodel` eszközzel. A következő leírásból állítsd össze a teljes JSON-példányt. A `shop` katalógusban két termék (`laptop`, `book`) és két kategória (`electronics`, `books`) van. A laptop mindkét kategóriába, a könyv a books kategóriába tartozik. Küldd be ezt a kezdeti állapotot a `check_instance` eszköznek. A diagnosztika alapján javítsd a laptop besorolását úgy, hogy az electronics maradjon. Őrizd meg az összes objektumot, a könyv besorolását és a többi kapcsolatot. Küldd be a javított teljes példányt is, és mutasd meg a két státuszt és a változást. Csak a megnevezett MCP-eszközöket használd, fájl és terminál nélkül.
 
-A laptop egyszerre az `electronics` és a `books` kategóriához tartozik, pedig pontosan egy kategória megengedett. Az első válasz `INVALID`, a diagnosztikában a `Product::category::invalidMultiplicity(laptop)` kifejezéssel. A [javított példány](examples/check-instance/valid.json) egyedül a laptop → books kapcsolatot törli. Az eredmény `{"status":"VALID","diagnostics":[]}`.
+Az első hívás várt eredménye `INVALID`, a diagnosztikában `Product::category::invalidMultiplicity(laptop)` szerepel. A második hívásnál egyedül a laptop → books kapcsolat hiányzik, az eredmény `{"status":"VALID","diagnostics":[]}`. A két ellenőrzés pontosan megismételhető ezekkel a bemenetekkel: [eredeti JSON](examples/check-instance/contradictory.json) és [javított JSON](examples/check-instance/valid.json).
 
 ## Licenc
 
