@@ -1,10 +1,10 @@
 # Refinery MCP
 
-Helyi Java MCP-szerver Refinery 0.3.0-hoz. A kliens lekérheti a csomagolt katalógus-metamodellt, és ellenőrizheti a hozzá készített teljes példánymodellt. A solver a gépeden fut. Az AI-modellhez tartozó hozzáférést a kliens kezeli.
+A local Java MCP server for Refinery 0.3.0. Clients can retrieve the bundled catalog metamodel and check complete instance models against it. The solver runs on your machine. Your MCP client manages access to the AI model.
 
-## Indítás VS Code-ban
+## Run in VS Code
 
-JDK 25 szükséges. A `JAVA_HOME` a JDK gyökérkönyvtárára mutasson a VS Code-ot indító környezetben. Ha most állítottad be, lépj ki a VS Code-ból, majd indítsd el újra ugyanabból a környezetből. A Gradle Wrappert a repository tartalmazza.
+Install JDK 25 and set `JAVA_HOME` to the JDK root directory in the environment you use to launch VS Code. If you just set the variable, quit VS Code and reopen it from that environment. The repository includes the Gradle Wrapper.
 
 ```powershell
 git clone https://github.com/terekzoltan/refinery-mcp.git
@@ -13,27 +13,27 @@ cd refinery-mcp
 code .
 ```
 
-Linuxon és macOS-en a build parancsa `./gradlew test installDist`. A [VS Code konfigurációja](.vscode/mcp.json) a kész disztribúcióból indítja a szervert. A parancspalettán válaszd az **MCP: List Servers → refineryMcp → Start Server** műveletet. Copilot Agent módban engedélyezd a szerver eszközeit. Új build használatához indítsd újra a szervert.
+On Linux and macOS, use `./gradlew test installDist` for the build. The [VS Code configuration](.vscode/mcp.json) launches the server from the built distribution. In the Command Palette, select **MCP: List Servers → refineryMcp → Start Server**. Enable the server’s tools in Copilot Agent mode. After rebuilding, restart the server to use the new build.
 
-## Eszközök
+## Tools
 
-| Eszköz | Bemenet | Válasz |
+| Tool | Input | Response |
 | --- | --- | --- |
-| `get_server_info` | `{}` | A szerver, Java, Refinery és az MCP SDK verziója, a diagnosztikai mód állapota. |
-| `get_metamodel` | `{}` | `metamodel_id`, `metamodel_version`, teljes `metamodel_source` és a forrás `source_sha256` lenyomata. |
-| `check_instance` | `objects` és `links` tömböket tartalmazó teljes példány. Egy objektum mezői `id`, `type`. Egy kapcsolaté `source`, `reference`, `target`. | `status` (`VALID` vagy `INVALID`) és a Refinery diagnosztikai üzeneteit tartalmazó `diagnostics` lista. Hibás bemeneti formátum esetén MCP-eszközhiba. |
-| `run_refinery_diagnostic` | `{"case_id":"valid"}` vagy `{"case_id":"contradictory"}` | Generálási státusz és siker esetén `model_source`. A csomagolt példákat futtatja, a VS Code konfigurációban megadott `--diagnostics` kapcsolóval érhető el. |
+| `get_server_info` | `{}` | The server, Java, Refinery, and MCP SDK versions, plus whether diagnostic mode is enabled. |
+| `get_metamodel` | `{}` | `metamodel_id`, `metamodel_version`, the full `metamodel_source`, and its `source_sha256` digest. |
+| `check_instance` | A complete instance with two arrays: `objects` and `links`. Each object has an `id` and a `type`. Each link has a `source`, a `reference`, and a `target`. | A `status` of `VALID` or `INVALID` and a `diagnostics` list containing Refinery’s messages. Malformed input returns an MCP tool error. |
+| `run_refinery_diagnostic` | `{"case_id":"valid"}` or `{"case_id":"contradictory"}` | Runs the generator on the selected bundled example and returns the generation status. On success, `model_source` contains the generated model. Available when the server starts with the `--diagnostics` flag, as in the VS Code configuration. |
 
-A `check_instance` minden hívásban a felsorolt objektumok és kapcsolatok teljes halmazát vizsgálja. A hiányzó kapcsolat hamis. A javítás során a kliens újraküldi a teljes jelöltet. A szerver a [rögzített metamodellt](src/main/resources/metamodels/catalog.problem) használja. Legfeljebb 64 objektumot és 256 kapcsolatot fogad, az azonosítók angol betűvel kezdődnek és legfeljebb 64 betűből, számból vagy aláhúzásból állnak.
+Each `check_instance` call checks exactly the objects and links supplied. An omitted link is false. To check a repair, resubmit the complete instance. The server uses the [fixed catalog metamodel](src/main/resources/metamodels/catalog.problem) and accepts up to 64 objects and 256 links per call. Identifiers can contain up to 64 ASCII letters, digits, or underscores and must start with a letter.
 
-## Példa Copilotból
+## Try it in Copilot
 
-Nyiss új Agent-chatet, és küldd el ezt a kérést.
+Open a new Agent chat and send this prompt:
 
-> Kérd le a metamodellt a `get_metamodel` eszközzel. A következő leírásból állítsd össze a teljes JSON-példányt. A `shop` katalógusban két termék (`laptop`, `book`) és két kategória (`electronics`, `books`) van. A laptop mindkét kategóriába, a könyv a books kategóriába tartozik. Küldd be ezt a kezdeti állapotot a `check_instance` eszköznek. A diagnosztika alapján javítsd a laptop besorolását úgy, hogy az electronics maradjon. Őrizd meg az összes objektumot, a könyv besorolását és a többi kapcsolatot. Küldd be a javított teljes példányt is, és mutasd meg a két státuszt és a változást. Csak a megnevezett MCP-eszközöket használd, fájl és terminál nélkül.
+> Use `get_metamodel` to retrieve the metamodel. Build a complete JSON instance from this inventory. The catalog `shop` contains two products (`laptop` and `book`) and two categories (`electronics` and `books`). The laptop belongs to both categories. The book belongs to `books`. Submit this initial state to `check_instance`. Use the diagnostic to correct the laptop’s classification so it belongs only to `electronics`. Preserve all objects, the book’s category, and every other link. Submit the complete corrected instance to `check_instance` and report both statuses and the change you made. Use only the two named MCP tools, without reading files or running terminal commands.
 
-Az első hívás várt eredménye `INVALID`, a diagnosztikában `Product::category::invalidMultiplicity(laptop)` szerepel. A második hívásnál egyedül a laptop → books kapcsolat hiányzik, az eredmény `{"status":"VALID","diagnostics":[]}`. A két ellenőrzés pontosan megismételhető ezekkel a bemenetekkel: [eredeti JSON](examples/check-instance/contradictory.json) és [javított JSON](examples/check-instance/valid.json).
+The first check should return `INVALID` with `Product::category::invalidMultiplicity(laptop)` in the diagnostic. Removing only the link from `laptop` to `books` should give `{"status":"VALID","diagnostics":[]}` on the second check. You can repeat the checks with the [original JSON](examples/check-instance/contradictory.json) and the [corrected JSON](examples/check-instance/valid.json).
 
-## Licenc
+## License
 
-A saját forráskód licence [EPL-2.0](LICENSE). A Gradle Wrapper szkriptjei és JAR-ja az [Apache-2.0](licenses/Apache-2.0.txt) licenc alatt érhetők el. A letöltött függőségekre a saját licenceik vonatkoznak.
+The project’s own source code is licensed under [EPL-2.0](LICENSE). The Gradle Wrapper scripts and JAR are licensed under [Apache-2.0](licenses/Apache-2.0.txt). Downloaded dependencies are subject to their respective licenses.
