@@ -1,0 +1,56 @@
+{
+  "objects": [
+    {
+      "id": "shop",
+      "type": "Catalog"
+    },
+    {
+      "id": "laptop",
+      "type": "Product"
+    },
+    {
+      "id": "book",
+      "type": "Product"
+    },
+    {
+      "id": "electronics",
+      "type": "Category"
+    },
+    {
+      "id": "books",
+      "type": "Category"
+    }
+  ],
+  "links": [
+    {
+      "source": "shop",
+      "reference": "products",
+      "target": "laptop"
+    },
+    {
+      "source": "shop",
+      "reference": "products",
+      "target": "book"
+    },
+    {
+      "source": "shop",
+      "reference": "categories",
+      "target": "electronics"
+    },
+    {
+      "source": "shop",
+      "reference": "categories",
+      "target": "books"
+    },
+    {
+      "source": "laptop",
+      "reference": "category",
+      "target": "electronics"
+    },
+    {
+      "source": "book",
+      "reference": "category",
+      "target": "books"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+Catalog(shop).
+Product(laptop).
+Product(book).
+Category(electronics).
+Category(books).
+
+products(shop, laptop).
+products(shop, book).
+categories(shop, electronics).
+categories(shop, books).
+category(laptop, electronics).
+category(book, books).
+
+scope Catalog = 1, Product = 2, Category = 2.

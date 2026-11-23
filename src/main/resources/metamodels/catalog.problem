@@ -1,0 +1,15 @@
+class Catalog {
+    contains Product[] products
+    contains Category[] categories
+}
+
+class Product {
+    Category[1] category
+}
+
+class Category.
+
+error categoryOutsideCatalog(Product product, Category selectedCategory) <->
+    category(product, selectedCategory),
+    products(catalog, product),
+    !categories(catalog, selectedCategory).

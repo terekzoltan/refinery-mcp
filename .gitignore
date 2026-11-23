@@ -1,0 +1,22 @@
+# Generated build files and local caches
+/.gradle/
+/build/
+/out/
+/bin/
+*.class
+*.log
+
+# Local credentials and provider configuration
+.env
+.env.*
+!.env.example
+chatLanguageModels.json
+
+# Machine-specific editor settings
+/.idea/
+*.iml
+/.vscode/settings.json
+
+# Operating system files
+.DS_Store
+Thumbs.db

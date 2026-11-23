@@ -1,0 +1,17 @@
+{
+  "servers": {
+    "refineryMcp": {
+      "type": "stdio",
+      "command": "${env:JAVA_HOME}/bin/java",
+      "args": [
+        "--enable-native-access=ALL-UNNAMED",
+        "-cp",
+        "${workspaceFolder}/build/install/refinery-mcp/lib/*",
+        "refinerymcp.Main",
+        "--mcp",
+        "--diagnostics"
+      ],
+      "cwd": "${workspaceFolder}"
+    }
+  }
+}
